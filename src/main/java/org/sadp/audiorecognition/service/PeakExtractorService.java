@@ -13,11 +13,12 @@ public class PeakExtractorService {
     public List<DataPoint> extractPeaks(List<DataPoint> spectrogram, int maxFrequencyBin, int maxTimeFrame){
         double[][] magnitudeMatrix=new double[maxFrequencyBin + 1][maxTimeFrame + 1];
 
+        //constructing the matrix
         for (DataPoint point : spectrogram) {
-            int freq = point.getFrequencyBin();
-            int time = point.getTimeFrame();
-            if (freq <= maxFrequencyBin && time <= maxTimeFrame) {
-                magnitudeMatrix[freq][time] = point.getMagnitude();
+            int freq=point.getFrequencyBin();
+            int time=point.getTimeFrame();
+            if (freq<=maxFrequencyBin && time<=maxTimeFrame) {
+                magnitudeMatrix[freq][time]=point.getMagnitude();
             }
         }
 
