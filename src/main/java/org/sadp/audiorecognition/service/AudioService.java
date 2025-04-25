@@ -19,6 +19,7 @@ public class AudioService {
     private final AudioUtils audioUtils;
     private final SpectrogramService spectrogramService;
     private final FingerprintService fingerprintService;
+    private final PeakExtractorService peakExtractorService;
 
     public String processUploadedAudio(MultipartFile file){
         try{
@@ -26,20 +27,27 @@ public class AudioService {
 //            System.out.println("Audio Service: Converted MP3 to WAV");
             float[] pcm=audioUtils.extractPcmSamples(wav);
             List<DataPoint> spectrogram=spectrogramService.generateSpectrogram(pcm);
+            List<DataPoint> peaks = peakExtractorService.extractPeaks(spectrogram, 1024, 300);
 
 //            log.info("Extracted {} PCM Sample", pcm.length);
 //            for(int i=0;i<10;i++){
 //                log.info("Sample {}: {}", i, pcm[i]);
 //            }
 
-            log.info("Spectrogram generated with {} points", spectrogram.size());
-            for (int i = 0; i < Math.min(10, spectrogram.size()); i++) {
-                DataPoint p = spectrogram.get(i*10000);
-                log.info("Point {}: freq={}, time={}, magnitude={}", i, p.getFrequencyBin(), p.getTimeFrame(), p.getMagnitude());
+//            log.info("Spectrogram generated with {} points", spectrogram.size());
+//            for (int i = 0; i < Math.min(10, spectrogram.size()); i++) {
+//                DataPoint p = spectrogram.get(i*10000);
+//                log.info("Point {}: freq={}, time={}, magnitude={}", i, p.getFrequencyBin(), p.getTimeFrame(), p.getMagnitude());
+//            }
+
+            log.info("Extracted {} peaks", peaks.size());
+            for (int i = 0; i < Math.min(10, peaks.size()); i++) {
+                DataPoint peak = peaks.get(i);
+                log.info("Peak {}: freq={}, time={}, magnitude={}", i, peak.getFrequencyBin(), peak.getTimeFrame(), peak.getMagnitude());
             }
 
             wav.delete();
-            return "Generated spectrogram with " + spectrogram.size() + " points";
+            return "Extracted "+peaks.size()+" peaks";
         }catch(Exception e){
 //            log.error("Error processing audio file", e);
             return "Error processing audio file: " + e.getMessage();
