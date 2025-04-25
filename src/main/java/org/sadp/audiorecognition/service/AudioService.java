@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,14 +44,14 @@ public class AudioService {
 //                log.info("Point {}: freq={}, time={}, magnitude={}", i, p.getFrequencyBin(), p.getTimeFrame(), p.getMagnitude());
 //            }
 
-            List<DataPoint> peaks = peakExtractorService.extractPeaks(spectrogram, 1024, 300);
+            List<DataPoint> peaks=peakExtractorService.extractPeaks(spectrogram, 1024, 300);
 //            log.info("Extracted {} peaks", peaks.size());
 //            for (int i = 0; i < Math.min(10, peaks.size()); i++) {
 //                DataPoint peak = peaks.get(i);
 //                log.info("Peak {}: freq={}, time={}, magnitude={}", i, peak.getFrequencyBin(), peak.getTimeFrame(), peak.getMagnitude());
 //            }
 
-            List<Fingerprint> fingerprints = fingerprintService.generateFingerprints(peaks);
+            List<Fingerprint> fingerprints=fingerprintService.generateFingerprints(peaks);
 //            log.info("Extracted {} fingerprints", fingerprints.size());
 //            for (int i = 0; i < Math.min(10, fingerprints.size()); i++) {
 //                Fingerprint fingerprint = fingerprints.get(i*100);
@@ -69,6 +70,19 @@ public class AudioService {
     }
 
     public String matchAudio(MultipartFile file){
-        return "Stub: matched"+ file.getOriginalFilename();
+        try{
+            File wav=audioUtils.convertMp3ToWav(file);
+            float[] pcm=audioUtils.extractPcmSamples(wav);
+            List<DataPoint> spectrogram=spectrogramService.generateSpectrogram(pcm);
+            List<DataPoint> peaks = peakExtractorService.extractPeaks(spectrogram, 1024, 300);
+            List<Fingerprint> fingerprints=fingerprintService.generateFingerprints(peaks);
+            Optional<Song> matched = fingerprintService.matchFingerprints(fingerprints);
+
+            return matched.map(song -> "Matched: " + song.getTitle() + " by " + song.getArtist())
+                    .orElse("No match found");
+        }catch (Exception e){
+//            log.error("Error matching audio file", e);
+            return "Error during matching: " + e.getMessage();
+        }
     }
 }

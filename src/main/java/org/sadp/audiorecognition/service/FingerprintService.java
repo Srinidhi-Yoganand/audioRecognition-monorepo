@@ -5,19 +5,22 @@ import org.sadp.audiorecognition.entity.Song;
 import org.sadp.audiorecognition.model.DataPoint;
 import org.sadp.audiorecognition.model.Fingerprint;
 import org.sadp.audiorecognition.repository.FingerprintRepository;
+import org.sadp.audiorecognition.repository.SongRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class FingerprintService {
 
     @Autowired
     private FingerprintRepository fingerprintRepository;
+    @Autowired
+    private SongRepository songRepository;
 
     private static final int FAN_VALUE=10;
 
@@ -71,5 +74,54 @@ public class FingerprintService {
         }).toList();
 
         fingerprintRepository.saveAll(entities);
+    }
+
+    public Optional<Song> matchFingerprints(List<Fingerprint> sampleFingerprints) {
+        Map<String, List<Integer>> hashToSampleTimeMap=new HashMap<>();
+        for (Fingerprint fingerprint : sampleFingerprints) {
+            String hash=fingerprint.getHash();
+            int time=fingerprint.getTime();
+
+            if (!hashToSampleTimeMap.containsKey(hash)) {
+                hashToSampleTimeMap.put(hash, new ArrayList<>());
+            }
+
+            hashToSampleTimeMap.get(hash).add(time);
+        }
+
+        Map<Long, Map<Integer, Integer>> songOffsetMatchCounts=new HashMap<>();
+        for (Map.Entry<String, List<Integer>> entry : hashToSampleTimeMap.entrySet()) {
+            String hash=entry.getKey();
+            List<FingerprintEntity> matches=fingerprintRepository.findByHash(hash);
+
+            for (FingerprintEntity match:matches) {
+                Long songId=match.getSong().getId();
+                for (Integer sampleTime:entry.getValue()) {
+                    int offset=match.getTime()-sampleTime;
+
+                    Map<Integer, Integer> offsetCountMap=songOffsetMatchCounts.computeIfAbsent(songId, k -> new HashMap<>());
+                    offsetCountMap.put(offset, offsetCountMap.getOrDefault(offset, 0) + 1);
+                }
+            }
+        }
+
+        long bestSongId=-1;
+        int maxCount=0;
+
+        for (Map.Entry<Long, Map<Integer, Integer>> songEntry:songOffsetMatchCounts.entrySet()) {
+            Long songId=songEntry.getKey();
+            Map<Integer, Integer> offsetMap=songEntry.getValue();
+
+            for (Map.Entry<Integer, Integer> offsetEntry:offsetMap.entrySet()) {
+                int count=offsetEntry.getValue();
+
+                if (count>maxCount) {
+                    maxCount=count;
+                    bestSongId=songId;
+                }
+            }
+        }
+
+        return bestSongId!=-1? songRepository.findById(bestSongId):Optional.empty();
     }
 }
