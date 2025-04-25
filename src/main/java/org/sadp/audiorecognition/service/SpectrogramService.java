@@ -37,7 +37,6 @@ public class SpectrogramService {
             }
         }
 
-        log.info("Generated spectrogram with {} data points", spectrogram.size());
         return spectrogram;
     }
 

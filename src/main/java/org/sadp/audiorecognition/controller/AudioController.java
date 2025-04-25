@@ -18,8 +18,10 @@ public class AudioController {
     private final AudioService audioService;
 
     @PostMapping("/upload")
-    public ResponseEntity<String> upload(@RequestParam("file")MultipartFile file){
-        String response=audioService.processUploadedAudio(file);
+    public ResponseEntity<String> upload(@RequestParam("file")MultipartFile file,
+                                         @RequestParam("songName")String songName,
+                                         @RequestParam("artistName")String artistName){
+        String response=audioService.processUploadedAudio(file, songName, artistName);
         return ResponseEntity.ok(response);
     }
 

@@ -1,8 +1,10 @@
 package org.sadp.audiorecognition.service;
 
 import lombok.RequiredArgsConstructor;
+import org.sadp.audiorecognition.entity.Song;
 import org.sadp.audiorecognition.model.DataPoint;
 import org.sadp.audiorecognition.model.Fingerprint;
+import org.sadp.audiorecognition.repository.SongRepository;
 import org.sadp.audiorecognition.util.AudioUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +23,9 @@ public class AudioService {
     private final SpectrogramService spectrogramService;
     private final FingerprintService fingerprintService;
     private final PeakExtractorService peakExtractorService;
+    private final SongRepository songRepository;
 
-    public String processUploadedAudio(MultipartFile file){
+    public String processUploadedAudio(MultipartFile file, String songName, String artistName){
         try{
             File wav=audioUtils.convertMp3ToWav(file);
 //            System.out.println("Audio Service: Converted MP3 to WAV");
@@ -48,10 +51,14 @@ public class AudioService {
 //            }
 
             List<Fingerprint> fingerprints = fingerprintService.generateFingerprints(peaks);
-            for (int i = 0; i < Math.min(10, fingerprints.size()); i++) {
-                Fingerprint fingerprint = fingerprints.get(i*100);
-                log.info("Fingerprint {}: hash={}, time={}", i, fingerprint.getHash(), fingerprint.getTime());
-            }
+//            log.info("Extracted {} fingerprints", fingerprints.size());
+//            for (int i = 0; i < Math.min(10, fingerprints.size()); i++) {
+//                Fingerprint fingerprint = fingerprints.get(i*100);
+//                log.info("Fingerprint {}: hash={}, time={}", i, fingerprint.getHash(), fingerprint.getTime());
+//            }
+
+            Song song=songRepository.save(new Song(null, songName, artistName));
+            fingerprintService.saveFingerprints(fingerprints, song);
 
             wav.delete();
             return "Extracted " + peaks.size() + " peaks and generated " + fingerprints.size() + " fingerprints.";

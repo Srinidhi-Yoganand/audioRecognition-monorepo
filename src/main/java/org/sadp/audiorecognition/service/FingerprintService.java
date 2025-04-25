@@ -1,7 +1,11 @@
 package org.sadp.audiorecognition.service;
 
+import org.sadp.audiorecognition.entity.FingerprintEntity;
+import org.sadp.audiorecognition.entity.Song;
 import org.sadp.audiorecognition.model.DataPoint;
 import org.sadp.audiorecognition.model.Fingerprint;
+import org.sadp.audiorecognition.repository.FingerprintRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.MessageDigest;
@@ -11,6 +15,10 @@ import java.util.List;
 
 @Service
 public class FingerprintService {
+
+    @Autowired
+    private FingerprintRepository fingerprintRepository;
+
     private static final int FAN_VALUE=10;
 
     public List<Fingerprint> generateFingerprints(List<DataPoint> peaks) {
@@ -51,5 +59,17 @@ public class FingerprintService {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-1 not supported", e);
         }
+    }
+
+    public void saveFingerprints(List<Fingerprint> fingerprints, Song song) {
+        List<FingerprintEntity> entities=fingerprints.stream().map(fp -> {
+            FingerprintEntity entity=new FingerprintEntity();
+            entity.setHash(fp.getHash());
+            entity.setTime(fp.getTime());
+            entity.setSong(song);
+            return entity;
+        }).toList();
+
+        fingerprintRepository.saveAll(entities);
     }
 }
