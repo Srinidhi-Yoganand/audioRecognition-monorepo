@@ -90,6 +90,7 @@ public class FingerprintService {
         }
 
         Map<Long, Map<Integer, Integer>> songOffsetMatchCounts=new HashMap<>();
+        int bucketSize=2;
         for (Map.Entry<String, List<Integer>> entry : hashToSampleTimeMap.entrySet()) {
             String hash=entry.getKey();
             List<FingerprintEntity> matches=fingerprintRepository.findByHash(hash);
@@ -98,9 +99,10 @@ public class FingerprintService {
                 Long songId=match.getSong().getId();
                 for (Integer sampleTime:entry.getValue()) {
                     int offset=match.getTime()-sampleTime;
+                    int offsetBucket = Math.round((float) offset / bucketSize);
 
                     Map<Integer, Integer> offsetCountMap=songOffsetMatchCounts.computeIfAbsent(songId, k -> new HashMap<>());
-                    offsetCountMap.put(offset, offsetCountMap.getOrDefault(offset, 0) + 1);
+                    offsetCountMap.put(offsetBucket, offsetCountMap.getOrDefault(offsetBucket, 0) + 1);
                 }
             }
         }
@@ -109,16 +111,15 @@ public class FingerprintService {
         int maxCount=0;
 
         for (Map.Entry<Long, Map<Integer, Integer>> songEntry:songOffsetMatchCounts.entrySet()) {
-            Long songId=songEntry.getKey();
-            Map<Integer, Integer> offsetMap=songEntry.getValue();
+            Long songId = songEntry.getKey();
+            Map<Integer, Integer> offsetMap = songEntry.getValue();
 
-            for (Map.Entry<Integer, Integer> offsetEntry:offsetMap.entrySet()) {
-                int count=offsetEntry.getValue();
+            int bestOffsetCount = offsetMap.values().stream().max(Integer::compareTo).orElse(0);
+            System.out.println("Song ID: " + songId + " best offset match count: " + bestOffsetCount);
 
-                if (count>maxCount) {
-                    maxCount=count;
-                    bestSongId=songId;
-                }
+            if (bestOffsetCount > maxCount) {
+                maxCount = bestOffsetCount;
+                bestSongId = songId;
             }
         }
 

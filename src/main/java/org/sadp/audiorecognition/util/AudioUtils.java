@@ -88,4 +88,49 @@ public class AudioUtils {
 
         return samples;
     }
+
+    public File convertWebmToWav(MultipartFile webmFile) throws Exception {
+        File tempWebm=File.createTempFile("Upload_", ".webm");
+        webmFile.transferTo(tempWebm);
+
+        File outputDir=new File(System.getProperty("java.io.tmpdir"));
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+
+        File convertedToWav=convertWebToWav(tempWebm, outputDir);
+        tempWebm.delete();
+
+        return convertedToWav;
+    }
+
+    private static File convertWebToWav(File webmFile, File outputDir) throws Exception {
+        String outputFilePath=new File(outputDir, webmFile.getName().replaceAll("\\.webm$", "") + ".wav").getAbsolutePath();
+
+        ProcessBuilder pb = new ProcessBuilder(
+                "ffmpeg",
+                "-y",
+                "-i", webmFile.getAbsolutePath(),
+                "-ac", "1",
+                "-ar", "44100",
+                "-f", "wav",
+                outputFilePath
+        );
+
+        pb.redirectErrorStream(true);
+        Process process=pb.start();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            while (reader.readLine() != null) {
+            }
+        }
+
+        int exitCode=process.waitFor();
+        if (exitCode!=0) {
+            throw new RuntimeException("FFmpeg conversion failed.");
+        }
+
+        return new File(outputFilePath);
+    }
+
 }

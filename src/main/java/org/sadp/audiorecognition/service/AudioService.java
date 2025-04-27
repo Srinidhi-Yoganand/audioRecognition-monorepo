@@ -71,11 +71,21 @@ public class AudioService {
 
     public String matchAudio(MultipartFile file){
         try{
-            File wav=audioUtils.convertMp3ToWav(file);
+            File wav;
+            if(file.getOriginalFilename().endsWith(".webm")){
+                wav=audioUtils.convertWebmToWav(file);
+            }else{
+                wav=audioUtils.convertMp3ToWav(file);
+            }
             float[] pcm=audioUtils.extractPcmSamples(wav);
             List<DataPoint> spectrogram=spectrogramService.generateSpectrogram(pcm);
             List<DataPoint> peaks = peakExtractorService.extractPeaks(spectrogram, 1024, 300);
             List<Fingerprint> fingerprints=fingerprintService.generateFingerprints(peaks);
+            System.out.println("Sample generated " + fingerprints.size() + " fingerprints");
+            for (int i = 0; i < Math.min(10, fingerprints.size()); i++) {
+                System.out.println("Sample Fingerprint " + i + ": " + fingerprints.get(i).getHash() + " at " + fingerprints.get(i).getTime());
+            }
+
             Optional<Song> matched = fingerprintService.matchFingerprints(fingerprints);
 
             return matched.map(song -> "Matched: " + song.getTitle() + " by " + song.getArtist())
