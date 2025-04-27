@@ -28,4 +28,10 @@ public class AudioController {
         String result=audioService.matchAudio(file);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/match/upload")
+    public ResponseEntity<String> matchUpload(@RequestParam("file")MultipartFile file){
+        String result=audioService.matchAudio(file);
+        return ResponseEntity.ok(result);
+    }
 }
