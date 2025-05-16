@@ -115,7 +115,7 @@ public class FingerprintService {
             Map<Integer, Integer> offsetMap = songEntry.getValue();
 
             int bestOffsetCount = offsetMap.values().stream().max(Integer::compareTo).orElse(0);
-            System.out.println("Song ID: " + songId + " best offset match count: " + bestOffsetCount);
+//            System.out.println("Song ID: " + songId + " best offset match count: " + bestOffsetCount);
 
             if (bestOffsetCount > maxCount) {
                 maxCount = bestOffsetCount;
