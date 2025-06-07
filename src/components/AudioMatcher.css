@@ -1,0 +1,67 @@
+/* AudioMatcher.css */
+
+.audio-matcher-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(to right, #3b82f6, #6366f1); 
+  padding: 0; 
+  margin: 0; 
+}
+
+.audio-matcher-form {
+  background-color: #fff;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  text-align: center;
+  margin: 0; 
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.record-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+  color: white;
+}
+
+.record-btn.start {
+  background-color: #3b82f6;
+}
+
+.record-btn.start:hover {
+  background-color: #2563eb;
+}
+
+.record-btn.stop {
+  background-color: #ef4444;
+}
+
+.record-btn.stop:hover {
+  background-color: #dc2626;
+}
+
+.result-text {
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+body {
+  border: none; 
+}
