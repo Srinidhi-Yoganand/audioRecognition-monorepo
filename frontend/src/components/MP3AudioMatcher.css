@@ -1,0 +1,60 @@
+/* Existing styles can remain the same */
+.audio-matcher-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(to right, #3b82f6, #6366f1);
+  padding: 0;
+  margin: 0;
+}
+
+.audio-matcher-form {
+  background-color: #fff;
+  padding: 32px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  text-align: center;
+  margin: 0;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24px;
+}
+
+.file-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+  color: white;
+  background-color: #3b82f6;
+}
+
+.submit-btn:hover {
+  background-color: #2563eb;
+}
+
+.result-text {
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+}
